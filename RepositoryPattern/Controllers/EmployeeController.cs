@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Mapster;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryPattern.Models;
 using RepositoryPattern.Repository.Interface;
@@ -16,17 +17,18 @@ namespace RepositoryPattern.Controllers
         }
         public async Task<ActionResult> Index()
         {
-            var employees = await repository.GetAll();
-            var employeeVm = new List<EmployeeViewModel>();
-            foreach (var employee in employees) {
-                employeeVm.Add(new EmployeeViewModel
-                {
-                    Id = employee.Id,
-                    FirstName = employee.FirstName,
-                    LastName = employee.LastName,
-                    Email = employee.Email,
-                    PhoneNumber=employee.PhoneNumber,
-                }); 
+            var employees =await repository.GetAll();
+            var employeeVm=new List<EmployeeViewModel>();
+            foreach(var employee in employees)
+            {
+                employeeVm.Add(new EmployeeViewModel() { 
+                    Id=employee.Id,
+                    FirstName=employee.FirstName,
+                    LastName=employee.LastName,
+                    Email=employee.Email,
+                    PhoneNumber=employee.PhoneNumber
+                });
+
             }
             return View(employeeVm);
         }
@@ -35,13 +37,8 @@ namespace RepositoryPattern.Controllers
         public async Task<ActionResult> Details(Guid id)
         {
             var employee =await repository.GetById(id);
-            var employeeVm = new EmployeeViewModel(){
-                Id=employee.Id,
-                FirstName=employee.FirstName,
-                LastName=employee.LastName,
-                Email = employee.Email,
-                PhoneNumber=employee.PhoneNumber
-            };
+            var employeeVm = new EmployeeViewModel();
+            employee.Adapt(employeeVm);
             return View(employeeVm);
         }
 
@@ -58,14 +55,8 @@ namespace RepositoryPattern.Controllers
         {
             try
             {
-                var employee = new Employee()
-                {
-                    Id = employeeViewModel.Id,
-                    FirstName = employeeViewModel.FirstName,
-                    LastName = employeeViewModel.LastName,
-                    Email = employeeViewModel.Email,
-                    PhoneNumber = employeeViewModel.PhoneNumber,
-                };
+                var employee = new Employee();
+                employeeViewModel.Adapt(employee);
                 await repository.Insert(employee);
                 await repository.Save();
                 return RedirectToAction(nameof(Index));
@@ -80,14 +71,8 @@ namespace RepositoryPattern.Controllers
         public async Task<ActionResult> Edit(Guid id)
         {
             var employee = await repository.GetById(id);
-            var employeeVm = new EmployeeViewModel()
-            {
-                Id = employee.Id,
-                FirstName = employee.FirstName,
-                LastName = employee.LastName,
-                Email = employee.Email,
-                PhoneNumber = employee.PhoneNumber,
-            };
+            var employeeVm = new EmployeeViewModel();
+            employee.Adapt(employeeVm);
             return View(employeeVm);
         }
 
@@ -98,14 +83,8 @@ namespace RepositoryPattern.Controllers
         {
             try
             {
-                var employee = new Employee()
-                {
-                    Id = employeeViewModel.Id,
-                    FirstName = employeeViewModel.FirstName,
-                    LastName = employeeViewModel.LastName,
-                    Email = employeeViewModel.Email,
-                    PhoneNumber=employeeViewModel.PhoneNumber,
-                };
+                var employee = new Employee();
+                employeeViewModel.Adapt(employee);
                 repository.Update(employee);
                 await repository.Save();
                 return RedirectToAction(nameof(Index));
